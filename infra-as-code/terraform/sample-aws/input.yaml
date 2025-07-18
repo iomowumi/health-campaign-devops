@@ -14,7 +14,7 @@ public_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQCaZjLsA86nYPYdxW3A+x3pe
 db_username: "testhealth"
 
 # Replace with Domain name you want for your web applications
-domain_name: "hcm-console.digit.org"
+domain_name: "a747ae2a4a9dd4a509eb86d5bdf3cf1e-862733845.ap-south-1.elb.amazonaws.com"
 
 # Replace with the name you want to give to your S3 bucket which is used to store the terraform states
 terraform_state_bucket_name: "hcm-tfstate-iomowumi-bao"
