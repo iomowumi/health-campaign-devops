@@ -2,26 +2,26 @@ name: DIGITClusterworkflow
 # Workflow branch
 on:
   push:
-    branches: 
+    branches:
       - master
-      - release-githubactions
-      
+      - hcm-egov-training
+
   workflow_dispatch:
     inputs:
       destroyCommand:
         description: 'Type "destroy" to run the terraform_infra_destruction job.'
         required: true
-        default: ''            
+        default: ""
 jobs:
   Input_validation:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     env:
       TF_IN_AUTOMATION: "true"
-      AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION:  ${{ secrets.AWS_DEFAULT_REGION }}
-      AWS_REGION:  ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
       # Now, use the env vars in subsequent steps
       - name: Display environment variables
         run: |
-          echo "Cluster Name: $CLUSTER_NAME"  
+          echo "Cluster Name: $CLUSTER_NAME"
       - name: Change working directory
         run: echo "This command is run in the current directory"
         working-directory: infra-as-code/terraform/sample-aws/remote-state
@@ -64,13 +64,13 @@ jobs:
       #     curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator
       #     chmod +x ./aws-iam-authenticator
       #     sudo mv ./aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
-      #     aws-iam-authenticator version  
+      #     aws-iam-authenticator version
       # - name: Generate kubeconfig
       #   run: |
       #     aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name $CLUSTER_NAME
       #     cat ~/.kube/config > kubeconfig
-      # - name: Deleting Loadbalancer 
-      #   run: kubectl delete svc nginx-ingress-controller -n egov       
+      # - name: Deleting Loadbalancer
+      #   run: kubectl delete svc nginx-ingress-controller -n egov
       # - name: Terraform Init - remotestate
       #   run: terraform init
       #   working-directory: infra-as-code/terraform/sample-aws/remote-state
@@ -88,7 +88,7 @@ jobs:
       #   working-directory: infra-as-code/terraform/sample-aws
       # - name: Terraform Destroy - Infra destruction
       #   run: terraform destroy -no-color -auto-approve -var db_password=demo123456
-      #   working-directory: infra-as-code/terraform/sample-aws       
+      #   working-directory: infra-as-code/terraform/sample-aws
 
   Terraform_Infra_Creation:
     if: ${{ github.event_name == 'push' }}
@@ -96,10 +96,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TF_IN_AUTOMATION: "true"
-      AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION:  ${{ secrets.AWS_DEFAULT_REGION }}
-      AWS_REGION:  ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -116,7 +116,7 @@ jobs:
       - name: Extract infra-as-code folder
         run: tar -xzf infra-as-code.tar.gz
       - name: Extract config-as-code folder
-        run: tar -xzf config-as-code.tar.gz 
+        run: tar -xzf config-as-code.tar.gz
       - name: Convert YAML to ENV
         uses: dcarbone/yaml-to-env-action@main
         with:
@@ -127,8 +127,8 @@ jobs:
           curl -o terraform.zip https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
           unzip terraform.zip
           sudo mv terraform /usr/local/bin/
-          terraform -version   
-      # Now, use the env vars in subsequent steps     
+          terraform -version
+      # Now, use the env vars in subsequent steps
       - name: Terraform Init - remotestate
         id: init
         run: terraform init
@@ -136,15 +136,15 @@ jobs:
       - name: Terraform Validate - remotestate
         id: validate
         run: terraform validate -no-color
-        working-directory: infra-as-code/terraform/sample-aws/remote-state  
+        working-directory: infra-as-code/terraform/sample-aws/remote-state
       - name: Terraform Plan - remotestate
         id: plan
-        run: terraform plan -no-color -input=false 
+        run: terraform plan -no-color -input=false
         working-directory: infra-as-code/terraform/sample-aws/remote-state
       - name: Terraform Apply - remotestate
         id: apply
         run: terraform apply -no-color -input=false -auto-approve
-        continue-on-error: true  
+        continue-on-error: true
         working-directory: infra-as-code/terraform/sample-aws/remote-state
       - name: Terraform init - Infra creation
         id: init-Infra
@@ -161,28 +161,28 @@ jobs:
       - name: Terraform Apply - Infra creation
         id: apply-Infra
         run: terraform apply -no-color -input=false -auto-approve -var db_password=demo123456 -lock=false
-        continue-on-error: true  
+        continue-on-error: true
         working-directory: infra-as-code/terraform/sample-aws
       - name: Install AWS IAM Authenticator
         run: |
           curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator
           chmod +x ./aws-iam-authenticator
           sudo mv ./aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
-          aws-iam-authenticator version  
+          aws-iam-authenticator version
       - name: Generate kubeconfig
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name $CLUSTER_NAME
           cat ~/.kube/config > kubeconfig
       - name: Verify kubectl configuration
-        run: kubectl config view 
+        run: kubectl config view
       - name: Verfiy kubectl get nodes
         run: |
-          kubectl get nodes  
+          kubectl get nodes
         env:
-          AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION:  ${{ secrets.AWS_DEFAULT_REGION }}
-          AWS_REGION:  ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
       - name: Updating the terraform output data in environment.yaml files for deployment
         run: terraform output -json | go run ../scripts/envYAMLUpdater.go
         working-directory: infra-as-code/terraform/sample-aws
@@ -199,7 +199,7 @@ jobs:
         uses: actions/upload-artifact@v4.4.0
         with:
           name: config-as-code-artifact-creation
-          path: config-as-code.tar.gz      
+          path: config-as-code.tar.gz
 
   DIGIT-deployment:
     if: ${{ github.event_name == 'push' }}
@@ -207,10 +207,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TF_IN_AUTOMATION: "true"
-      AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION:  ${{ secrets.AWS_DEFAULT_REGION }}
-      AWS_REGION:  ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -227,43 +227,43 @@ jobs:
       - name: Extract infra-as-code folder
         run: tar -xzf infra-as-code.tar.gz
       - name: Extract config-as-code folder
-        run: tar -xzf config-as-code.tar.gz 
+        run: tar -xzf config-as-code.tar.gz
       - name: Convert YAML to ENV
         uses: dcarbone/yaml-to-env-action@main
         with:
           yaml-file: infra-as-code/terraform/sample-aws/input.yaml
           debug: true # Optional: set to true to output some debug information
-      # Now, use the env vars in subsequent steps          
+      # Now, use the env vars in subsequent steps
       - name: Install AWS IAM Authenticator
         run: |
           curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator
           chmod +x ./aws-iam-authenticator
           sudo mv ./aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
-          aws-iam-authenticator version  
+          aws-iam-authenticator version
       - name: Generate kubeconfig
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name $CLUSTER_NAME
           cat ~/.kube/config > kubeconfig
       - name: Verify kubectl configuration
-        run: kubectl config view 
+        run: kubectl config view
       - name: Verfiy kubectl get nodes
         run: |
-          kubectl get nodes  
+          kubectl get nodes
         env:
-          AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION:  ${{ secrets.AWS_DEFAULT_REGION }}
-          AWS_REGION:  ${{ secrets.AWS_REGION }}   
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
       - name: Install sops
         run: |
           sudo apt update
           sudo apt install -y gnupg
           wget https://github.com/mozilla/sops/releases/download/v3.7.1/sops-v3.7.1.linux
           chmod +x sops-v3.7.1.linux
-          sudo mv sops-v3.7.1.linux /usr/local/bin/sops            
+          sudo mv sops-v3.7.1.linux /usr/local/bin/sops
       - name: digit deployment
         run: go run digit_installer.go
-        working-directory: deploy-as-code/deployer 
+        working-directory: deploy-as-code/deployer
       - name: Displaying the Loadbalancer ID
         run: |
           LB_ID=$(kubectl get svc nginx-ingress-controller -n egov -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
@@ -271,20 +271,20 @@ jobs:
           echo "Thank you for installing DIGIT! 🙏 Your installation is complete and ready to roll! 🚀"
           echo "Please map the LoadBalancer ID ($LB_ID) with the domain provided in input.yaml to access the DIGIT UI"
         env:
-          AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION:  ${{ secrets.AWS_DEFAULT_REGION }}
-          AWS_REGION:  ${{ secrets.AWS_REGION }}  
-  
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
   terraform_infra_destruction:
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.destroyCommand == 'destroy' }}
     runs-on: ubuntu-latest
     env:
       TF_IN_AUTOMATION: "true"
-      AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION:  ${{ secrets.AWS_DEFAULT_REGION }}
-      AWS_REGION:  ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -295,7 +295,7 @@ jobs:
           debug: true # Optional: set to true to output some debug information
       - name: Display environment variables
         run: |
-          echo "Cluster Name: $CLUSTER_NAME"  
+          echo "Cluster Name: $CLUSTER_NAME"
       - name: Change working directory
         run: echo "This command is run in the current directory"
         working-directory: infra-as-code/terraform/sample-aws/remote-state
@@ -307,21 +307,21 @@ jobs:
           curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator
           chmod +x ./aws-iam-authenticator
           sudo mv ./aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
-          aws-iam-authenticator version  
+          aws-iam-authenticator version
       - name: Generate kubeconfig
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name $CLUSTER_NAME
           cat ~/.kube/config > kubeconfig
         continue-on-error: true
-      - name: Deleting Loadbalancer 
-        run: kubectl delete svc nginx-ingress-controller -n egov   
+      - name: Deleting Loadbalancer
+        run: kubectl delete svc nginx-ingress-controller -n egov
         continue-on-error: true
       - name: Download Terraform
         run: |
           curl -o terraform.zip https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
           unzip terraform.zip
           sudo mv terraform /usr/local/bin/
-          terraform -version   
+          terraform -version
       - name: Terraform Init - remotestate
         run: terraform init
         working-directory: infra-as-code/terraform/sample-aws/remote-state
@@ -339,4 +339,4 @@ jobs:
         working-directory: infra-as-code/terraform/sample-aws
       - name: Terraform Destroy - Infra destruction
         run: terraform destroy -no-color -auto-approve -var db_password=demo123456 -lock=false
-        working-directory: infra-as-code/terraform/sample-aws                   
+        working-directory: infra-as-code/terraform/sample-aws
