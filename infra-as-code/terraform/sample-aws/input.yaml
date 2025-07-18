@@ -7,6 +7,8 @@ cluster_name: "testhealth-k8supgrade-iomowumi-bao"
 # DB name must contain only alphanumeric characters
 db_name: "testhealthdb"
 
+public_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQCaZjLsA86nYPYdxW3A+x3peBMrVPCgUI9IZuOGTn9OtsiQppcd/NPZe1/yfzSk4VitKi9XhFvNz4hG8k5FL1sVfFbpa3NkRDiA/fIohYU7ctkSTetQLrINrVlpHrdB4L2Q8OSDqo+YbJfl1is1sV8hJ+wOg6DmPpy7hGmJcCgKdHhhvgYBa42YYISCAMHSs4XyN8tMAEnRKg0oLD35iYTc0O8i2cfOccHITAr9mYVgkb/iN/Sgn2i7lumjo2Q2uoy/V3u8zfNz0VwDHcRei3DUHCoxYfyIXLSNyWHLJEQCJPKr/yIOVSgXk0y3q7igkjGEg/uZeu1vO9uVz8U/LP"
+
 # Replace with DB username you want
 # DB user name must contain only alphanumeric characters
 db_username: "testhealth"
